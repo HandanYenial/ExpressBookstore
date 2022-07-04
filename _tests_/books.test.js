@@ -31,14 +31,13 @@ describe("POST/books" , function(){
         const response = await request(app)
         .post(`/books`)
         .send({
-            isbn: "32794782",
-            amazon_url: "https://www.amazon.com/dp/0321125851",
+            amazon_url: "https://taco.com",
             author: "mctest",
-            language: "English",
-            pages : 1000,
-            publisher: "any publisher",
-            title: "test book",
-            year :2000
+            language: "english",
+            pages: 1000,
+            publisher: "yeah right",
+            title: "book title",
+            year: 2000
         });
         expect(response.statusCode).toBe(201);
         expect(response.body.book.isbn).toHaveProperty("isbn");
@@ -75,5 +74,54 @@ describe("GET/books" , function(){
         });
     });
 
-    d
+    describe("PUT/books/:id" , function(){
+        test("Updates a single book" , async function(){
+            const response = await request(app)
+                  .put(`/books/${book_isbn}`)
+                  .send({
+                    amazon_url: "https://taco.com",
+                    author: "mctest",
+                    language: "english",
+                    pages: 1000,
+                    publisher: "yeah right",
+                    title: "UPDATED BOOK",
+                    year: 2000
+
+            });
+        expect(response.body.book).toHaveProperty("isbn");
+        expect(response.body.book.title).toBe("UPDATED BOOK");
+        });
+
+        test("Prevents a bad book update" , async function(){
+            const response = await request(app)
+                 .put(`/books/${book_isbn}`)
+                 .send({
+                    isbn: "32794782",
+                    badField: "DO NOT ADD ME!",
+                    amazon_url: "https://taco.com",
+                    author: "mctest",
+                    language: "english",
+                    pages: 1000,
+                    publisher: "yeah right",
+                    title: "UPDATED BOOK",
+                    year: 2000
+                });
+            expect(response.statusCode).toBe(400);
+        });
+
+        test("Responds 404 if can't find book in question" , async function(){
+            //delete the book first
+            await request(app)
+                  .delete(`/books/${book_isbn}`)
+            const response = await request(app).delete(`/books/${book_isbn}`);
+            expect(response.statusCode).toBe(404);
+        }); 
+    });
+
+    describe("DELETE/books/:id" , function(){
+        test("Deletes a single book" , async function(){
+            const response = await request(app)
+                  .delete(`/books/${book_isbn}`);
+            expect(response.statusCode).toEqual({message: "Book deleted"});
+        });
 });
