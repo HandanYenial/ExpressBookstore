@@ -124,4 +124,13 @@ describe("GET/books" , function(){
                   .delete(`/books/${book_isbn}`);
             expect(response.statusCode).toEqual({message: "Book deleted"});
         });
+    });
+
+afterEach(async function(){
+    await db.query("DELETE FROM books");
+});
+
+afterAll(async function(){
+    await db.end();
+});
 });
