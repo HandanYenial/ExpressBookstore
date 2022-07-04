@@ -3,16 +3,16 @@ const Book = require("../models/book");
 
 const router = new express.Router();
 
-const { validate } = require("jsonschema");
-const bookSchemaNew = require ("../schemas/bookSchemaNew");
-const bookSchemaUpdate = require("../schemas/bookSchemaUpdate"); 
+const { validate } = require("jsonschema"); //validate data against schema
+const bookSchemaNew = require ("../schemas/bookSchemaNew"); //schema for new book
+const bookSchemaUpdate = require("../schemas/bookSchemaUpdate"); //schema for update book
 
 
 /** GET / => {books: [book, ...]}  */
 
-router.get("/", async function (req, res, next) {
+router.get("/", async function (req, res, next) { //get all books
   try {
-    const books = await Book.findAll(req.query);
+    const books = await Book.findAll(req.query); 
     return res.json({ books });
   } catch (err) {
     return next(err);
@@ -43,15 +43,15 @@ router.get("/:id", async function (req, res, next) {
 
 router.post("/" , async function(req,res,next){
   try{
-    const validation = validate(req.body, bookSchemaNew);
-    if(validation.valid){
+    const validation = validate(req.body, bookSchemaNew); //validate data against schema
+    if(validation.valid){ //if data is valid
       return next({
-        status: 400,
-        error: validation.errors.map(e => e.stack)
+        status: 400, //bad request
+        error: validation.errors.map(e => e.stack) //return error message
       });
     }
-    const book = await Book.create(req.body);
-    return res.status(201).json({book});
+    const book = await Book.create(req.body); //create book
+    return res.status(201).json({book}); //return book
    }
    catch(err){
     return next(err);
@@ -64,6 +64,19 @@ router.post("/" , async function(req,res,next){
 
 router.put("/:isbn", async function (req, res, next) {
   try {
+    if ("isbn" in req.body){
+      return next({
+        status:400,
+        message: "Not allowed"
+      });
+    }
+    const validation = validate(req.body, bookSchemaUpdate); //validate data against schema
+    if(!validation.valid){
+      return next({
+        status :400,
+        error: validation.errors.map(e => e.stack)
+      });
+    }
     const book = await Book.update(req.params.isbn, req.body);
     return res.json({ book });
   } catch (err) {
